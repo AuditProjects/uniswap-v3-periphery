@@ -125,6 +125,7 @@ contract NonfungiblePositionManager is
     }
 
     /// @inheritdoc INonfungiblePositionManager
+    // 添加流动性入口, 每次新开一个区间头寸 NFT(tokenId)
     function mint(MintParams calldata params)
         external
         payable
@@ -195,6 +196,7 @@ contract NonfungiblePositionManager is
     function baseURI() public pure override returns (string memory) {}
 
     /// @inheritdoc INonfungiblePositionManager
+    // 给已有头寸 (对应 NFT tokenId) 追加流动性
     function increaseLiquidity(IncreaseLiquidityParams calldata params)
         external
         payable
@@ -306,6 +308,7 @@ contract NonfungiblePositionManager is
     }
 
     /// @inheritdoc INonfungiblePositionManager
+    // 取出当前头寸（tokenId）应得的手续费
     function collect(CollectParams calldata params)
         external
         payable
@@ -327,6 +330,7 @@ contract NonfungiblePositionManager is
 
         // trigger an update of the position fees owed and fee growth snapshots if it has any liquidity
         if (position.liquidity > 0) {
+            // 在 pool 侧以 0 数量触发一次结算
             pool.burn(position.tickLower, position.tickUpper, 0);
             (, uint256 feeGrowthInside0LastX128, uint256 feeGrowthInside1LastX128, , ) =
                 pool.positions(PositionKey.compute(address(this), position.tickLower, position.tickUpper));
@@ -358,6 +362,7 @@ contract NonfungiblePositionManager is
             );
 
         // the actual amounts collected are returned
+        // 真正从 pool 取钱, 拿到对应金额的 token0/token1
         (amount0, amount1) = pool.collect(
             recipient,
             position.tickLower,
